@@ -8,4 +8,4 @@ RUN python -m pip install -r requirements.txt
 
 COPY . /app
 
-CMD flask --app labproject1 run -h 0.0.0.0 -p 3030
+CMD flask --app labproject1 run -h 0.0.0.0 -p $PORT
