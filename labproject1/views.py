@@ -20,12 +20,13 @@ records = {}
 
 @app.post('/user')
 def create_user():
-    user_data = request.get_json()
+    user_name = request.args.get('name')
     user_id = uuid.uuid4().hex
-    user = {"id": user_id, **user_data}
+    user = {"id": user_id, 'name':user_name}
     users[user_id] = user
 
     return user
+
 
 @app.route('/user/<string:user_id>', methods=['GET', 'DELETE'])
 def get_delete_user(user_id):
@@ -48,9 +49,9 @@ def work_category():
     if request.method == 'GET':
         return categories
     elif request.method == 'POST':
-        cat_data = request.get_json()
+        cat_name = request.args.get("name")
         cat_id = uuid.uuid4().hex
-        cat = {"id": cat_id, **cat_data}
+        cat = {"id": cat_id, "name": cat_name}
         categories[cat_id] = cat
         return cat
     else:
@@ -64,29 +65,33 @@ def delete_category(category_id):
 
 @app.route('/record', methods=['POST'])
 def post_record():
-    record_data = request.get_json()
+    record_user = request.args.get("userid")
+    record_cat = request.args.get("catid")
+    record_sum = request.args.get("sum")
     record_id = uuid.uuid4().hex
-    record = {"id": record_id, "time":datetime.now().strftime("%Y-%m-%d %H:%M:%S"), **record_data}
+    record = {"id": record_id, 
+              "time":datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+              "category_id":record_cat,
+              "user_id": record_user,
+              "sum": record_sum
+            }
     records[record_id] = record
     return record
 
 @app.route('/record', methods=['GET'])
 def get_record_by_ides():
-    id_data = request.get_json()
-    user_id = id_data.get('user_id', None)
-    category_id = id_data.get('category_id', None)
+    id_data = request.args
+    # id_data = request.get_json()
+    user_id = id_data.get('userid', None)
+    category_id = id_data.get('catid', None)
 
     if not user_id and not category_id:
         return "Any parametres are given", 400
 
     filtered_records = []
-
-    
     f_records = {}
-
     if user_id:
         f_records = {i:records[i] for i in records if records[i]['user_id'] == user_id}
-
     if category_id:
         f_records = {i:f_records[i] for i in f_records if f_records[i]['category_id'] == category_id}
 
